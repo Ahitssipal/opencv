@@ -4,21 +4,27 @@
 using namespace std;
 using namespace cv;
 
-Mat based(506, 706, CV_8UC3, Scalar(255, 255, 255));
+int edgeThick = 3;
+
+Mat based(500 + edgeThick * 2, 500 + 400 + edgeThick * 2, CV_8UC3, Scalar(255, 255, 255));
 Point ptOld;
 void on_mouse(int evnet, int x, int y, int flags, void* userdata);
 void edgeLine(Mat img);
 void drawText(Mat img, const string text);
 
-int edgeThick = 3;
-
+// 그리기 영역
 Rect rectDrawing(0, 0, 500 + edgeThick * 2, 500 + edgeThick * 2);
 Rect drawingSpace(edgeThick, edgeThick, 500, 500);
+
+// 1열 메뉴
 Rect rectSave(500 + edgeThick * 2, 0, 200, 100);
 Rect rectLoad(500 + edgeThick * 2, 100, 200, 100);
 Rect rectClear(500 + edgeThick * 2, 200, 200, 100);
 Rect rectRun(500 + edgeThick * 2, 300, 200, 100 + edgeThick * 2);
 Rect rectExit(500 + edgeThick * 2, 400 + edgeThick * 2, 200, 100);
+
+// 2열 메뉴
+Rect rectFeature1(500 + 200 + edgeThick * 2, 0, 200, 100);
 
 int main(void)
 {
@@ -50,6 +56,11 @@ int main(void)
 	edgeLine(numberExit);
 	drawText(numberExit, "Exit");
 	numberExit.copyTo(based(rectExit));
+
+	Mat numberFeature1(100, 200, CV_8UC3, Scalar(255, 255, 255));
+	edgeLine(numberFeature1);
+	drawText(numberFeature1, "Feature1");
+	numberFeature1.copyTo(based(rectFeature1));
 
 	Mat clearBased = based.clone();
 
@@ -103,6 +114,13 @@ void on_mouse(int event, int x, int y, int flags, void* userdata)
 			cout << "프로그램 종료" << endl;
 			destroyAllWindows();
 		}
+		else if (rectFeature1.contains(Point(x, y)))
+		{
+			Mat gray;
+			cvtColor(based(drawingSpace), gray, COLOR_BGR2GRAY);
+			gray = ~gray;
+			imshow("gray", gray);
+		}
 		break;
 	case EVENT_MOUSEMOVE:
 		if (flags && EVENT_FLAG_LBUTTON && drawingSpace.contains(Point(x, y))) {
@@ -119,7 +137,6 @@ void on_mouse(int event, int x, int y, int flags, void* userdata)
 	}
 }
 
-
 void edgeLine(Mat img)
 {
 	line(img, Point(0, 0), Point(img.cols - 1, 0), Scalar(0, 0, 0), edgeThick);
@@ -131,7 +148,7 @@ void edgeLine(Mat img)
 void drawText(Mat img, const string text)
 {
 	int fontFace = FONT_HERSHEY_SIMPLEX;
-	double fontScale = 1.5;
+	double fontScale = 1;
 	int thickness = 3;
 
 	Size sizeText = getTextSize(text, fontFace, fontScale, thickness, 0);
